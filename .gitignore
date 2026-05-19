@@ -1,0 +1,9 @@
+# Environment files
+backend/.env
+backend/venv/
+node_modules/
+frontend/node_modules/
+frontend/build/
+__pycache__/
+*.pyc
+.DS_Store

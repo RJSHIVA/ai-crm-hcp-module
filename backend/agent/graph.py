@@ -192,13 +192,26 @@ async def run_agent(message: str, conversation_history: list, db: Session) -> st
     db_session = db
 
     messages = [HumanMessage(content=message)]
-
     result = await app_graph.ainvoke({"messages": messages})
 
-    # Find last AI message
-    for msg in reversed(result["messages"]):
-        if hasattr(msg, "content") and msg.content and not hasattr(msg, "tool_calls"):
-            if msg.content != message:  # not the user message
-                return msg.content
+    all_messages = result["messages"]
+    
+    # Collect all tool results + final AI response
+    final_response = ""
+    
+    for msg in all_messages:
+        msg_type = type(msg).__name__
+        content = getattr(msg, "content", "") or ""
+        
+        # ToolMessage — tool ka actual output
+        if msg_type == "ToolMessage" and content:
+            final_response += content + "\n"
+        
+        # AIMessage with content and no tool_calls — final reply
+        elif msg_type == "AIMessage" and content and not getattr(msg, "tool_calls", []):
+            final_response += content
 
-    return result["messages"][-1].content
+    if final_response.strip():
+        return final_response.strip()
+    
+    return "Action completed successfully!"

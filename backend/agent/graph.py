@@ -156,21 +156,19 @@ tools = [log_interaction, edit_interaction, get_hcp_history, suggest_followups, 
 llm_with_tools = llm.bind_tools(tools)
 
 def agent_node(state: AgentState):
-    system_prompt = """You are an AI assistant for a pharmaceutical CRM system. 
-    You help field representatives log and manage their interactions with Healthcare Professionals (HCPs/Doctors).
+    system_prompt = """You are an AI assistant for a pharmaceutical CRM system.
     
-    You have access to these tools:
-    1. log_interaction - Save a new doctor meeting/interaction
-    2. edit_interaction - Modify an existing interaction
-    3. get_hcp_history - View past interactions with a doctor
-    4. suggest_followups - Get AI suggestions for next steps
-    5. analyze_sentiment - Analyze doctor's reaction/sentiment
+    IMPORTANT: You MUST use tools for every request. NEVER reply with just text.
     
-    Always be helpful, professional and concise. Extract relevant information from user messages."""
-
-    messages = [SystemMessage(content=system_prompt)] + state["messages"]
-    response = llm_with_tools.invoke(messages)
-    return {"messages": [response]}
+    RULES:
+    - User says "show history" or "history of Dr X" → ALWAYS call get_hcp_history tool
+    - User says "log meeting" or "met with Dr X" → ALWAYS call log_interaction tool
+    - User says "suggest followups" → ALWAYS call suggest_followups tool
+    - User says "analyze sentiment" → ALWAYS call analyze_sentiment tool
+    - User says "edit interaction" → ALWAYS call edit_interaction tool
+    
+    NEVER say "Would you like to..." — just call the tool directly!
+    Extract doctor name from message and call the appropriate tool immediately."""
 
 def should_continue(state: AgentState):
     last_message = state["messages"][-1]

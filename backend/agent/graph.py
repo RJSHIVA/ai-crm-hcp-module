@@ -93,7 +93,7 @@ def get_hcp_history(hcp_name: str) -> str:
             return f"No interactions found for {hcp_name}"
         result = f"📋 Found {len(interactions)} interaction(s) with {hcp_name}:\n"
         for i in interactions:
-            result += f"\n• ID:{i.id} | {i.interaction_type} on {i.date} | Sentiment: {i.sentiment} | Topics: {i.topics_discussed}"
+            result += f"\n• ID: {i.id}\n  Type: {i.interaction_type}\n  Date: {i.date}\n  Sentiment: {i.sentiment}\n  Topics: {i.topics_discussed}\n  Outcomes: {i.outcomes}\n  Follow-ups: {i.follow_up_actions}\n"
         return result
     except Exception as e:
         return f"❌ Error: {str(e)}"

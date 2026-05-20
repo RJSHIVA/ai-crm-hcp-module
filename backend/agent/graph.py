@@ -191,14 +191,14 @@ async def run_agent(message: str, conversation_history: list, db: Session) -> st
     global db_session
     db_session = db
 
-    messages = []
-    for msg in conversation_history:
-        if msg.get("role") == "user":
-            messages.append(HumanMessage(content=msg["content"]))
-
-    messages.append(HumanMessage(content=message))
+    messages = [HumanMessage(content=message)]
 
     result = await app_graph.ainvoke({"messages": messages})
 
-    last_message = result["messages"][-1]
-    return last_message.content
+    # Find last AI message
+    for msg in reversed(result["messages"]):
+        if hasattr(msg, "content") and msg.content and not hasattr(msg, "tool_calls"):
+            if msg.content != message:  # not the user message
+                return msg.content
+
+    return result["messages"][-1].content
